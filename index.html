@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<title>실시간 금융 대시보드 - 자비스</title>
+<title>실시간 금융 대시보드</title>
 
 <!-- TradingView Advanced Chart -->
 <script src="https://s3.tradingview.com/tv.js"></script>
@@ -68,6 +68,15 @@ body{
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+
+.summary-footnote{
+  margin-top:8px;
+  font-size:11px;
+  color:var(--muted);
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 /* ===== 메인 차트 영역 ===== */
@@ -157,12 +166,12 @@ main{
       </div>
     </div>
 
-    <!-- ✅ 미국채 10년 (자동 갱신: TradingView single-quote) -->
+    <!-- ✅ 미국 10년물 금리 대체: CBOE:TNX (보통 금리×10로 표시됨) -->
     <div class="summary-card">
       <div class="tradingview-widget-container">
         <script src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
         {
-          "symbol": "TVC:US10",
+          "symbol": "CBOE:TNX",
           "width": "100%",
           "colorTheme": "dark",
           "isTransparent": true,
@@ -171,15 +180,13 @@ main{
         </script>
       </div>
 
-      <div style="margin-top:8px; font-size:11px; color:var(--muted);">
-        참고:
+      <div class="summary-footnote">
+        <span>※ TNX는 “10년물 금리 지수”로 표기값이 보통 <b>금리×10</b>입니다 (예: 41.70 → 4.170%).</span>
         <a href="https://m.stock.naver.com/marketindex/bond/US10YT=RR" target="_blank" rel="noopener"
-           style="color:var(--muted); text-decoration:underline;">네이버(US10Y)</a>
-        ·
-        <a href="https://tradingview.com/symbols/TVC-US10/" target="_blank" rel="noopener"
-           style="color:var(--muted); text-decoration:underline;">TradingView(US10)</a>
+           style="color:var(--muted); text-decoration:underline;">네이버(US10Y) 확인</a>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -189,7 +196,7 @@ main{
     <div id="tv_usdkrw" class="widget"></div>
   </section>
 
-  <!-- ✅ 미국채 10년 Detail(차트) 섹션: 완전 삭제 -->
+  <!-- ✅ 미국채 10년 Detail(차트) 섹션: 삭제 (AAPL 튐 원천 제거) -->
 
   <section class="card half">
     <header>WTI 원유 선물 차트</header>
