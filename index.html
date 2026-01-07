@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>실시간: USD환율 · 유가 · 미국 10년물 금리</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #121a2b;
+      --text: #e7eefc;
+      --muted: #a8b3c7;
+      --border: rgba(255,255,255,.08);
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+      background: radial-gradient(1200px 600px at 10% 0%, #152447 0%, var(--bg) 50%);
+      color: var(--text);
+    }
+    header {
+      padding: 22px 18px 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+      letter-spacing: .2px;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill {
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 18px 26px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+    .card {
+      grid-column: span 12;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .card header {
+      padding: 14px 14px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .card header h2 {
+      font-size: 14px;
+      margin: 0;
+      color: var(--text);
+      font-weight: 650;
+    }
+    .card header .hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0;
+      white-space: nowrap;
+    }
+    .widget {
+      height: 360px;
+    }
+
+    @media (min-width: 900px) {
+      .card.half { grid-column: span 6; }
+      .widget { height: 380px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>실시간(거의 실시간) 금융 모니터</h1>
+    <div class="sub">
+      <span class="pill">USD/KRW 환율</span>
+      <span class="pill">유가 (WTI · Brent)</span>
+      <span class="pill">미국 10년물 수익률</span>
+      <span class="pill">마지막 갱신: <b id="ts">-</b></span>
+    </div>
+  </header>
+
+  <!-- TradingView 스크립트(공용) -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
+
+  <main>
+    <!-- USD/KRW -->
+    <section class="card half">
+      <header>
+        <h2>USD/KRW (달러/원)</h2>
+        <p class="hint">Source: TradingView</p>
+      </header>
+      <div id="tv_usdkrw" class="widget"></div>
+    </section>
+
+    <!-- 미국 10년물 수익률 -->
+    <section class="card half">
+      <header>
+        <h2>미국 10년물 수익률 (US10Y)</h2>
+        <p class="hint">Source: TradingView</p>
+      </header>
+      <div id="tv_us10y" class="widget"></div>
+    </section>
+
+    <!-- 유가: WTI -->
+    <section class="card half">
+      <header>
+        <h2>유가: WTI (USOIL)</h2>
+        <p class="hint">Source: TradingView</p>
+      </header>
+      <div id="tv_wti" class="widget"></div>
+    </section>
+
+    <!-- 유가: Brent -->
+    <section class="card half">
+      <header>
+        <h2>유가: Brent (UKOIL)</h2>
+        <p class="hint">Source: TradingView</p>
+      </header>
+      <div id="tv_brent" class="widget"></div>
+    </section>
+  </main>
+
+  <script>
+    // 페이지 상단 "마지막 갱신" 타임스탬프(로컬 시간)
+    function updateTimestamp() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      document.getElementById("ts").textContent = ts;
+    }
+    updateTimestamp();
+    setInterval(updateTimestamp, 1000);
+
+    // TradingView 차트 생성 헬퍼
+    function makeChart(containerId, symbol, title) {
+      new TradingView.widget({
+        autosize: true,
+        symbol,
+        interval: "15",                 // 15분봉 (원하면 "1", "5", "60", "D" 등으로 변경)
+        timezone: "Asia/Seoul",
+        theme: "dark",
+        style: "1",
+        locale: "kr",
+        toolbar_bg: "#121a2b",
+        enable_publishing: false,
+        hide_top_toolbar: false,
+        hide_legend: false,
+        allow_symbol_change: false,
+        save_image: false,
+        container_id: containerId,
+        studies: [],
+      });
+    }
+
+    // 심볼들
+    makeChart("tv_usdkrw", "FX_IDC:USDKRW", "USD/KRW");
+    makeChart("tv_us10y", "TVC:US10Y", "US 10Y Yield");
+    makeChart("tv_wti", "TVC:USOIL", "WTI");
+    makeChart("tv_brent", "TVC:UKOIL", "Brent");
+  </script>
+</body>
+</html>
