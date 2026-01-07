@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <title>실시간 금융 대시보드 - 자비스</title>
 
-<!-- TradingView Core (Advanced Chart) -->
+<!-- TradingView Advanced Chart -->
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
@@ -15,10 +15,7 @@
   --muted:#9aa4b2;
   --border:rgba(255,255,255,.18);
   --card-bg:rgba(255,255,255,.10);
-  --up-color:#ff4d4d;
-  --down-color:#4facfe;
 }
-
 *{ box-sizing:border-box; }
 
 body{
@@ -29,23 +26,36 @@ body{
   line-height: 1.5;
 }
 
-/* ===== 요약 패널: 다시 "세로" ===== */
+/* ===== 요약 패널 (세로) ===== */
 .summary-container{
   padding:16px;
   background:rgba(0,0,0,.10);
 }
 
 .summary-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.summary-title{
   font-size:13px;
   font-weight:800;
   color:var(--muted);
-  margin-bottom:15px;
   letter-spacing:1px;
+}
+
+.summary-ts{
+  font-size:12px;
+  color:var(--muted);
+  white-space:nowrap;
 }
 
 .summary-grid{
   display:flex;
-  flex-direction:column; /* ✅ 항상 세로 */
+  flex-direction:column;
   gap:12px;
 }
 
@@ -60,50 +70,36 @@ body{
   justify-content:center;
 }
 
-/* 네이버 스타일 미국채 박스 */
-.naver-box{
-  text-decoration:none;
-  color:inherit;
-  cursor:pointer;
-  transition:transform 0.2s;
-}
-.naver-box:active { transform: scale(0.98); }
-.naver-label { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
-.naver-price { font-size: 28px; font-weight: 800; color: var(--up-color); display: flex; align-items: baseline; gap: 8px;}
-.naver-change { font-size: 14px; font-weight: 500; }
-
 /* ===== 메인 차트 영역 ===== */
 main{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px 16px 60px;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:10px 16px 60px;
+  display:grid;
+  grid-template-columns:repeat(12, 1fr);
+  gap:16px;
 }
 
 .card{
-  grid-column: span 12;
-  border-radius: 20px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  overflow: hidden;
+  grid-column:span 12;
+  border-radius:20px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  overflow:hidden;
 }
 
 .card header{
-  padding: 14px 18px;
-  font-size: 15px;
-  font-weight: 700;
-  background: rgba(255,255,255,0.05);
+  padding:14px 18px;
+  font-size:15px;
+  font-weight:700;
+  background:rgba(255,255,255,0.05);
 }
 
-.widget{
-  height: 380px;
-}
+.widget{ height:380px; }
 
-/* 데스크탑: 차트만 2열 */
-@media(min-width: 900px){
-  .half { grid-column: span 6; }
+/* 데스크탑: 차트 2열 */
+@media(min-width:900px){
+  .half{ grid-column:span 6; }
 }
 </style>
 </head>
@@ -120,16 +116,19 @@ main{
       history.replaceState({}, "", url.toString());
       location.reload();
     }
+sin
   }catch(e){}
 })();
 </script>
 
 <div class="summary-container">
-  <div class="summary-header">● MARKET SNAPSHOT</div>
+  <div class="summary-header">
+    <div class="summary-title">● MARKET SNAPSHOT</div>
+    <div class="summary-ts">로컬시간: <span id="ts">-</span></div>
+  </div>
 
-  <!-- ✅ 요약: 세로 -->
   <div class="summary-grid">
-
+    <!-- USD/KRW -->
     <div class="summary-card">
       <div class="tradingview-widget-container">
         <script src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
@@ -144,6 +143,7 @@ main{
       </div>
     </div>
 
+    <!-- WTI -->
     <div class="summary-card">
       <div class="tradingview-widget-container">
         <script src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
@@ -158,16 +158,28 @@ main{
       </div>
     </div>
 
-    <!-- US10Y는 상단 요약 박스로만 유지(정확/안정), 차트는 제거 -->
-    <a href="https://m.stock.naver.com/worldstock/index/US10Y" target="_blank" class="summary-card naver-box" rel="noopener">
-      <div class="naver-label">미국 국채 10년 (US10Y)</div>
-      <div class="naver-price">
-        <span id="us10y-val">4.1670</span>
-        <span class="naver-change" style="color:var(--down-color)">▼ 0.0120 (-0.29%)</span>
+    <!-- ✅ US10Y: 네이버 대신 "실시간 표시 가능한 임베드 위젯" 사용 -->
+    <div class="summary-card">
+      <div class="tradingview-widget-container">
+        <script src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {
+          "symbol": "TVC:US10Y",
+          "width": "100%",
+          "colorTheme": "dark",
+          "isTransparent": true,
+          "locale": "kr"
+        }
+        </script>
       </div>
-      <div style="font-size:11px; color:var(--muted); margin-top:5px;">네이버 증권에서 실시간 확인 ></div>
-    </a>
-
+      <div style="margin-top:8px; font-size:11px; color:var(--muted);">
+        참고 링크:
+        <a href="https://m.stock.naver.com/marketindex/bond/US10YT=RR" target="_blank" rel="noopener"
+           style="color:var(--muted);">네이버(US10Y)</a>
+        ·
+        <a href="https://tradingview.com/symbols/TVC-US10Y/" target="_blank" rel="noopener"
+           style="color:var(--muted);">TradingView(US10Y)</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -177,7 +189,7 @@ main{
     <div id="tv_usdkrw" class="widget"></div>
   </section>
 
-  <!-- ❌ 미국채 10년물 차트 섹션 완전 삭제 -->
+  <!-- ✅ 미국채 10년 Detail(차트) 섹션은 완전 삭제 -->
 
   <section class="card half">
     <header>WTI 원유 선물 차트</header>
@@ -191,6 +203,18 @@ main{
 </main>
 
 <script>
+/* 상단 로컬 타임스탬프 */
+function updateTimestamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const el = document.getElementById("ts");
+  if (el) el.textContent = ts;
+}
+updateTimestamp();
+setInterval(updateTimestamp, 1000);
+
+/* TradingView Advanced Chart */
 function createChart(id, symbol){
   new TradingView.widget({
     autosize: true,
@@ -202,7 +226,6 @@ function createChart(id, symbol){
     locale: "kr",
     enable_publishing: false,
     hide_top_toolbar: true,
-    hide_legend: false,
     allow_symbol_change: false,
     save_image: false,
     container_id: id
