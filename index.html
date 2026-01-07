@@ -92,7 +92,7 @@ main{
   padding:14px 18px;
   font-size:15px;
   font-weight:700;
-  background:rgba(255,255,255,0.05);
+  background:rgba(255,255,255,.05);
 }
 
 .widget{ height:380px; }
@@ -157,7 +157,7 @@ main{
       </div>
     </div>
 
-    <!-- ✅ US 10Y Yield (임베드 호환 심볼로 교체: TVC:US10) -->
+    <!-- ✅ 미국채 10년 (자동 갱신: TradingView single-quote) -->
     <div class="summary-card">
       <div class="tradingview-widget-container">
         <script src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
@@ -172,12 +172,12 @@ main{
       </div>
 
       <div style="margin-top:8px; font-size:11px; color:var(--muted);">
-        참고 링크:
+        참고:
         <a href="https://m.stock.naver.com/marketindex/bond/US10YT=RR" target="_blank" rel="noopener"
-           style="color:var(--muted);">네이버(US10Y)</a>
+           style="color:var(--muted); text-decoration:underline;">네이버(US10Y)</a>
         ·
         <a href="https://tradingview.com/symbols/TVC-US10/" target="_blank" rel="noopener"
-           style="color:var(--muted);">TradingView(TVC:US10)</a>
+           style="color:var(--muted); text-decoration:underline;">TradingView(US10)</a>
       </div>
     </div>
   </div>
@@ -189,7 +189,7 @@ main{
     <div id="tv_usdkrw" class="widget"></div>
   </section>
 
-  <!-- ✅ 미국채 10년 Detail(차트) 섹션은 삭제 -->
+  <!-- ✅ 미국채 10년 Detail(차트) 섹션: 완전 삭제 -->
 
   <section class="card half">
     <header>WTI 원유 선물 차트</header>
@@ -204,7 +204,7 @@ main{
 
 <script>
 /* 상단 로컬 타임스탬프 */
-function updateTimestamp() {
+function updateTimestamp(){
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
   const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -218,7 +218,7 @@ setInterval(updateTimestamp, 1000);
 function createChart(id, symbol){
   new TradingView.widget({
     autosize: true,
-    symbol: symbol,
+    symbol,
     interval: "60",
     timezone: "Asia/Seoul",
     theme: "dark",
@@ -232,7 +232,7 @@ function createChart(id, symbol){
   });
 }
 
-window.addEventListener("load", function() {
+window.addEventListener("load", function(){
   createChart("tv_usdkrw", "FX_IDC:USDKRW");
   createChart("tv_wti", "TVC:USOIL");
   createChart("tv_brent", "TVC:UKOIL");
