@@ -30,25 +30,47 @@ body{
   line-height:1.5;
 }
 
-/* ===== 요약 패널 ===== */
+/* ===== 상단 요약 (가로 1줄 요약 + 모바일 스크롤) ===== */
 .summary-container{
   padding:16px;
   background:rgba(0,0,0,.10);
 }
 
 .summary-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.summary-header .title{
   font-size:13px;
   font-weight:800;
   color:var(--muted);
-  margin-bottom:15px;
   letter-spacing:1px;
 }
 
-.summary-grid{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+.summary-header .ts{
+  font-size:12px;
+  color:var(--muted);
+  opacity:.9;
+  white-space:nowrap;
 }
+
+.summary-row{
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+  /* 모바일: 가로 한 줄 + 스크롤 */
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px;
+}
+
+.summary-row::-webkit-scrollbar{ height:8px; }
+.summary-row::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.12); border-radius:999px; }
+.summary-row::-webkit-scrollbar-track{ background:transparent; }
 
 .summary-card{
   min-height:110px;
@@ -59,6 +81,22 @@ body{
   display:flex;
   flex-direction:column;
   justify-content:center;
+
+  /* 모바일에서 카드가 너무 좁아지지 않게 */
+  min-width: 320px;
+}
+
+/* TradingView single-quote 위젯 숫자 "체감 확대" (iframe 자체는 못 바꾸지만 스케일로 키움) */
+.summary-card .tradingview-widget-container{
+  width:100%;
+}
+.summary-card .tradingview-widget-container__widget{
+  transform: scale(1.18);
+  transform-origin: left top;
+}
+/* 스케일업하면 아래가 잘릴 수 있어 카드 높이 조금 확보 */
+.summary-card{
+  min-height: 128px;
 }
 
 /* 네이버 스타일 미국채 박스 */
@@ -70,8 +108,14 @@ body{
 }
 .naver-box:active{ transform:scale(.98); }
 .naver-label{ font-size:14px; color:var(--muted); margin-bottom:5px; }
-.naver-price{ font-size:28px; font-weight:800; color:var(--up-color); display:flex; align-items:baseline; gap:8px; }
-.naver-change{ font-size:14px; font-weight:500; }
+.naver-price{ font-size:32px; font-weight:900; color:var(--up-color); display:flex; align-items:baseline; gap:8px; }
+.naver-change{ font-size:14px; font-weight:600; }
+.naver-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+  opacity:.95;
+}
 
 /* ===== 메인 차트 영역 ===== */
 main{
@@ -94,60 +138,41 @@ main{
 .card header{
   padding:14px 18px;
   font-size:15px;
-  font-weight:700;
+  font-weight:800;
   background:rgba(255,255,255,.05);
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.card header .hint{
+  font-size:12px;
+  font-weight:650;
+  color:var(--muted);
 }
 
 .widget{ height:380px; }
 
-/* US10Y 안내 패널 */
-.notice{
-  height:380px;
-  padding:18px;
-  background:var(--card-bg-2);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  justify-content:center;
-}
-
-.notice-title{
-  font-weight:800;
-  font-size:14px;
-}
-
-.notice-text{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.notice-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:6px;
-}
-
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  text-decoration:none;
-  font-size:13px;
-  font-weight:700;
-}
-.btn:active{ transform:scale(.98); }
-
-/* 데스크탑 */
+/* 데스크탑 (2열) */
 @media(min-width:900px){
-  .summary-grid{ flex-direction:row; }
-  .summary-card{ flex:1; min-height:130px; }
   .half{ grid-column:span 6; }
+  .summary-card{
+    min-width: 0;      /* 데스크탑에서는 3개가 꽉 차게 */
+    flex: 1;
+  }
+  .summary-row{
+    overflow-x:visible; /* 데스크탑에서는 스크롤 없애기 */
+    padding-bottom:0;
+  }
+}
+
+/* 모바일에서는 위젯 크기 조금 덜 키워서 잘림 방지 */
+@media(max-width:420px){
+  .summary-card .tradingview-widget-container__widget{
+    transform: scale(1.12);
+  }
+  .summary-card{ min-width: 300px; }
 }
 </style>
 </head>
@@ -169,8 +194,13 @@ main{
 </script>
 
 <div class="summary-container">
-  <div class="summary-header">● MARKET SNAPSHOT</div>
-  <div class="summary-grid">
+  <div class="summary-header">
+    <div class="title">● MARKET SNAPSHOT</div>
+    <div class="ts">갱신: <span id="ts">-</span></div>
+  </div>
+
+  <!-- ✅ 모바일: 가로 1줄(스크롤) / 데스크탑: 3개가 꽉 차게 -->
+  <div class="summary-row">
 
     <!-- USDKRW -->
     <div class="summary-card">
@@ -202,14 +232,14 @@ main{
       </div>
     </div>
 
-    <!-- US10Y (네이버 링크 박스 유지) -->
+    <!-- US10Y 숫자: 네이버 링크 박스(정확/안정) -->
     <a href="https://m.stock.naver.com/worldstock/index/US10Y" target="_blank" class="summary-card naver-box" rel="noopener">
-      <div class="naver-label">미국 국채 10년 (US10Y)</div>
+      <div class="naver-label">미국 국채 10년 수익률 (US10Y)</div>
       <div class="naver-price">
         <span id="us10y-val">4.1670</span>
         <span class="naver-change" style="color:var(--down-color)">▼ 0.0120 (-0.29%)</span>
       </div>
-      <div style="font-size:11px; color:var(--muted); margin-top:5px;">네이버 증권에서 실시간 확인 ></div>
+      <div class="naver-sub">네이버 증권에서 실시간 확인 ></div>
     </a>
 
   </div>
@@ -217,41 +247,52 @@ main{
 
 <main>
   <section class="card half">
-    <header>USD/KRW 환율 차트</header>
+    <header>
+      <span>USD/KRW 환율 차트</span>
+      <span class="hint">TradingView</span>
+    </header>
     <div id="tv_usdkrw" class="widget"></div>
   </section>
 
-  <!-- ✅ 여기: US10Y 차트 대신 안내 패널 (AAPL 튐 방지) -->
+  <!-- ✅ (1) US10Y 차트 대신 ZN(10년물 선물) 차트로 교체 -->
   <section class="card half">
-    <header>미국채 10년물 금리 (US10Y)</header>
-    <div class="notice">
-      <div class="notice-title">TradingView “차트 위젯”에서 US10Y(금리)는 지원되지 않습니다.</div>
-      <div class="notice-text">
-        그래서 차트 영역이 종종 애플(AAPL) 등으로 자동 대체되는 현상이 생깁니다.<br/>
-        위쪽 MARKET SNAPSHOT의 US10Y 박스와 아래 버튼을 사용해 주세요.
-      </div>
-      <div class="notice-actions">
-        <a class="btn" href="https://m.stock.naver.com/worldstock/index/US10Y" target="_blank" rel="noopener">네이버 US10Y 열기</a>
-        <a class="btn" href="https://tradingview.com/symbols/TVC-US10Y/" target="_blank" rel="noopener">TradingView US10Y 페이지</a>
-      </div>
-      <div class="notice-text" style="margin-top:6px;">
-        * “차트”가 꼭 필요하면, 금리 대신 10년물 선물(ZN) 가격 차트로 대체할 수 있어요.
-      </div>
-    </div>
+    <header>
+      <span>미국채 10년물 선물 (ZN1!) 차트</span>
+      <span class="hint">*금리(US10Y)와 반대로 움직일 수 있음</span>
+    </header>
+    <div id="tv_zn" class="widget"></div>
   </section>
 
   <section class="card half">
-    <header>WTI 원유 선물 차트</header>
+    <header>
+      <span>WTI 원유 선물 차트</span>
+      <span class="hint">TradingView</span>
+    </header>
     <div id="tv_wti" class="widget"></div>
   </section>
 
   <section class="card half">
-    <header>Brent 원유 선물 차트</header>
+    <header>
+      <span>Brent 원유 선물 차트</span>
+      <span class="hint">TradingView</span>
+    </header>
     <div id="tv_brent" class="widget"></div>
   </section>
 </main>
 
 <script>
+/* 상단 갱신 타임스탬프 */
+function updateTimestamp(){
+  const d = new Date();
+  const pad = (n)=> String(n).padStart(2,"0");
+  const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const el = document.getElementById("ts");
+  if(el) el.textContent = ts;
+}
+updateTimestamp();
+setInterval(updateTimestamp, 1000);
+
+/* TradingView Advanced Chart */
 function createChart(id, symbol){
   new TradingView.widget({
     autosize: true,
@@ -270,8 +311,9 @@ function createChart(id, symbol){
   });
 }
 
-window.addEventListener("load", function() {
+window.addEventListener("load", function(){
   createChart("tv_usdkrw", "FX_IDC:USDKRW");
+  createChart("tv_zn", "CBOT:ZN1!");
   createChart("tv_wti", "TVC:USOIL");
   createChart("tv_brent", "TVC:UKOIL");
 });
